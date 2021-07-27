@@ -37,13 +37,15 @@ void unbin_like(){
         pdf_arr[f][var]->Fill(cut_tree->GetLeaf(vars[var])->GetValue(0));
       }
       pdf_arr[f][var]->Scale(1/pdf_arr[f][var]->Integral("width"));//Normalising to create probability distribution functions
-      pdf_arr[f][var]->Draw("HIST C");
+      pdf_arr[f][var]->Draw("HIST C");//Draw smooth curve
       pdf_arr[f][var]->GetXaxis()->SetTitle(Form("%s",vars[var].Data())); pdf_arr[f][var]->GetXaxis()->SetTitleSize(0.05);
       pdf_arr[f][var]->GetYaxis()->SetTitle("Probability"); pdf_arr[f][var]->GetYaxis()->SetTitleSize(0.05);
       pdf_arr[f][var]->SetLineWidth(2);
       pdf_arr[f][var]->SetTitle("");
       pdf_arr[f][var]->SetStats(0);
-      c1->SaveAs(Form("%s/pdf_images/%s_%s.png",pwd,vars[var].Data(),pdf[f].Data()));
+      pdf_arr[f][var]->GetYaxis()->SetTitleOffset(1.2);//Ensure pdf y axis fits on canvas
+      c1->SetLeftMargin(0.15);
+      c1->SaveAs(Form("%s/pdf_images/%s_%s.png",pwd,vars[var].Data(),pdf[f].Data()));//Saving pdf image into folder within pwd
       delete c1; //delete canvas object for loop
     }
     delete tree;
