@@ -1,13 +1,16 @@
-#include "unbin_like.h"
 #include <TROOT.h>
+#include "unbin_like.h"
+
 
 void unbin_like(){
 
   gROOT->SetBatch(1);//Disbale ROOT canvas output for histogram matrix
+  gErrorIgnoreLevel = kWarning;// Turn off saving file messages to terminal
+
+  const char * pwd = gSystem->pwd();//Get current directory for image saving
 
   //pdf matrix of histograms for signal and background and the number of vars
   TH1F * pdf_arr[pdf.size()][vars.size()];
-  TList * l = new TList();
 
   //Number of bins for pdfs
   const int n_bins = 200;
@@ -34,15 +37,18 @@ void unbin_like(){
         pdf_arr[f][var]->Fill(cut_tree->GetLeaf(vars[var])->GetValue(0));
       }
       pdf_arr[f][var]->Scale(1/pdf_arr[f][var]->Integral("width"));//Normalising to create probability distribution functions
-      l->Add(pdf_arr[f][var]);
+      pdf_arr[f][var]->Draw("HIST C");
+      pdf_arr[f][var]->GetXaxis()->SetTitle(Form("%s",vars[var].Data())); pdf_arr[f][var]->GetXaxis()->SetTitleSize(0.05);
+      pdf_arr[f][var]->GetYaxis()->SetTitle("Probability"); pdf_arr[f][var]->GetYaxis()->SetTitleSize(0.05);
+      pdf_arr[f][var]->SetLineWidth(2);
+      pdf_arr[f][var]->SetTitle("");
+      pdf_arr[f][var]->SetStats(0);
+      c1->SaveAs(Form("%s/pdf_images/%s_%s.png",pwd,vars[var].Data(),pdf[f].Data()));
       delete c1; //delete canvas object for loop
     }
     delete tree;
     delete cut_tree;
   }
-
-  TFile * f = new TFile("histlist.root", "RECREATE");
-  l->Write("histlist", TObject::kSingleKey);
 
   //Size array before likelihood analysis i.e. Monte Carlo size
   float size_mc[data_files.size()];
@@ -107,16 +113,20 @@ void unbin_like(){
 
   gROOT->SetBatch(0);// Enable ROOT canvas output
 
-  //Stacked histogram and legend for plot
+  //Stacked histogram, legend and title for plot
   THStack * stack = new THStack("stack","");
   TLegend *legend = new TLegend(0.6,0.6,0.9,0.9);
+  TPaveText * t1 =new TPaveText(0.15,0.91,0.85,0.98,"NBNDC");
+  t1->AddText("Likelihood Ratio Analysis");
+  t1->SetFillStyle(0);
+  t1->SetLineColor(0);
 
   TH1F * ratio_hist[7];// Histogram array for components
   std::vector<TString> names = {"big", "small","singles","world","geo","N","Li"};//Names for histograms
 
   //Filling and formatting histograms
   for(int f=0; f<data_files.size(); f++){
-    ratio_hist[f] = new TH1F(Form("%s_hist",names[f].Data()), names[f].Data(),100,-50,100);
+    ratio_hist[f] = new TH1F(Form("%s_hist",names[f].Data()), names[f].Data(),200,-80,100);
     for(int i=0; i<ratios[f].size();i++){
       ratio_hist[f]->Fill(ratios[f][i]);//Fill histogram with ratio values
     }
@@ -130,13 +140,12 @@ void unbin_like(){
   //Plotting each component
   TCanvas * c1 = new TCanvas("c1");
   stack->Draw("NOSTACK HIST");
-  stack->GetXaxis()->SetTitle("Likelihood Ratio");
-  stack->GetYaxis()->SetTitle("Normalised Number of Events");
+  stack->GetXaxis()->SetTitle("Likelihood Ratio"); stack->GetXaxis()->SetTitleSize(0.05);
+  stack->GetYaxis()->SetTitle("Normalised Number of Events"); stack->GetYaxis()->SetTitleSize(0.05);
   legend->Draw();
-  TPaveText * t1 =new TPaveText(0.15,0.91,0.85,0.98,"NBNDC");
-  t1->AddText("Likelihood Ratio Analysis");
-  t1->SetFillStyle(0);
-  t1->SetLineColor(0);
+  t1->Draw();
+
+  
 
   //Output values to a csv file 
   std::ofstream ratio_csv;
