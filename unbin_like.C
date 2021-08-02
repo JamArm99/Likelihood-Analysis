@@ -1,7 +1,6 @@
 #include <TROOT.h>
 #include "unbin_like.h"
 
-
 void unbin_like(){
 
   gROOT->SetBatch(1);//Disbale ROOT canvas output for histogram matrix
