@@ -6,7 +6,7 @@ This project aims to conduct an unbinned log-likelihood analysis to calculate th
 
 ## Prerequisities
 
-Simulations of events at the Boulby detector are output as root files for analysis in the object-based data analysis framework, ROOT, developed by particle physicists [1](https://doi.org/10.1016/S0168-9002(97)00048-X). To install ROOT, please follow the instructions on (<https://root.cern/install/>).
+Simulations of events at the Boulby detector are output as root files for analysis in the object-based data analysis framework, ROOT, developed by particle physicists [[1]](https://doi.org/10.1016/S0168-9002(97)00048-X). To install ROOT, please follow the instructions on <https://root.cern/install/>.
 
 ## Download
 
@@ -19,7 +19,7 @@ cd Unbinned-Likelihood-Analysis
 
 ## Excecute
 
-To execute **_unbin_like.C_**, your simulation root files must be added to the same directory for it to find them. Once complete, open the header file **_unbin_like.h_** to change the file names inside the data_files vector. The analysis is sensitive to the order of the components; the correct order should be: Hartlepool 1 (Big), Hartlepool 2 (Small), combined singles, world reactors, geoneutrinos, nitrogen - 17, and lithium - 9.
+To execute **_unbin_like.C_**, your simulation root files must be added to the same directory for it to find them. Once complete, open the header file **_unbin_like.h_** to change the file names inside the **_data_files_** and **_pdf_files_** vectors. Total signal and background files need to be added for probability distribution function (pdf) generation. The analysis is sensitive to the order of the components; the correct order should be: Hartlepool 1 (Big), Hartlepool 2 (Small), combined singles, world reactors, geoneutrinos, nitrogen - 17, and lithium - 9.
 
 Ensure the ROOT shell is sourced.
 
@@ -37,7 +37,13 @@ or within ROOT itself
 
 ```bash
 root
-root[0] .X unbin_like.C()
+root [0] .X unbin_like.C()
 ```
 
 ## Outputs
+
+Several useful outputs are generated when executing this analysis. As the probability distribution functions are formed within the calculation for the selected reconstruction parameters, images of these distributions are saved as png files inside the **_pdf_images_** directory.
+
+ The primary analysis visualisation is output to the working directory as **_likelihood_ratio.png_** and displays each component's normalised log-likelihood ratio distribution.
+
+ By selecting thresholds to the ratio, the significance can be calculated along with daily rates. These values are output into the **_ratio_threshold.csv_** file.
